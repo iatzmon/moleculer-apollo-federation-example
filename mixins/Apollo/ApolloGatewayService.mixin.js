@@ -7,17 +7,15 @@ const {GraphQLRequestContext, GraphQLResponse} = require("graphql-request/dist/s
 const axios = require("axios");
 
 const moleculerGraphQLDataSource = function(service) {
-	const ctx = this;
+	const svc = this;
+	const broker = svc.broker;
 	return {
 		async process(request) {
-			// if (!request.context.span) {
-			//     request.context.span = this.broker.tracer.startSpan("GraphQL request");
-			// }
-			// @ts-ignore
-			const callCtx = ctx.broker;
-			const result = await callCtx.call(`${service.name}.executeQuery`, {
+			const result = await broker.call(`${service.name}.executeQuery`, {
 				query: request.request.query,
 				variables: request.request.variables
+			}, {
+				parentSpan: request.context.span
 			});
 			const response = {
 				status: 200,
@@ -53,6 +51,7 @@ const ApolloGatewayService = {
 			});
 		},
 		async initServer() {
+			const broker = this.broker;
 			await this.waitForServices("$node");
 			const services = await this.broker.call("$node.services", {
 				onlyLocal: true,
@@ -64,10 +63,23 @@ const ApolloGatewayService = {
 				introspection: true,
 				playground: true,
 				subscriptions: false,
-				context: (req) => ({
-					span: req.res.locals.span,
-					ctx: req.res.locals.ctx
-				})
+				plugins: [
+					{
+						requestDidStart(requestContext) {
+							requestContext.context.span = broker.tracer.startSpan("Execute query", { tags: {
+								query: requestContext.request.query,
+								variables: requestContext.request.variables
+							}});
+							return {
+								willSendResponse(requestContext) {
+									console.log("Will send response");
+									if (requestContext.context.span)
+										requestContext.context.span.finish();
+								}
+							};
+						}
+					}
+				]
 			});
 			const app = express();
 			app.use((async function(req, res, next) {
