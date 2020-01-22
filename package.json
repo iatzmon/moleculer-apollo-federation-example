@@ -1,0 +1,32 @@
+{
+  "name": "moleculer-apollo-federation-example",
+  "version": "1.0.0",
+  "description": "My Moleculer microservices project",
+  "scripts": {
+    "dev": "moleculer-runner --repl --hot services",
+    "start": "moleculer-runner",
+    "cli": "moleculer connect ",
+    "lint": "eslint services"
+  },
+  "keywords": [
+    "microservices",
+    "moleculer"
+  ],
+  "author": "",
+  "devDependencies": {
+    "eslint": "^6.1.0",
+    "moleculer-repl": "^0.5.7"
+  },
+  "dependencies": {
+    "@apollo/federation": "latest",
+    "@apollo/gateway": "latest",
+    "apollo-server-express": "latest",
+    "axios": "^0.19.2",
+    "express": "latest",
+    "graphql-request": "latest",
+    "moleculer": "^0.14.0-beta7"
+  },
+  "engines": {
+    "node": ">= 8.x.x"
+  }
+}
