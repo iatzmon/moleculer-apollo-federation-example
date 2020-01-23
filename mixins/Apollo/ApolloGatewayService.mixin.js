@@ -51,6 +51,7 @@ const ApolloGatewayService = {
 			});
 		},
 		async initServer() {
+			const svc = this;
 			const broker = this.broker;
 			await this.waitForServices("$node");
 			const services = await this.broker.call("$node.services", {
@@ -66,7 +67,7 @@ const ApolloGatewayService = {
 				plugins: [
 					{
 						requestDidStart(requestContext) {
-							requestContext.context.span = broker.tracer.startSpan("Execute query", { tags: {
+							requestContext.context.span = broker.tracer.startSpan("Execute query", { service: svc, tags: {
 								query: requestContext.request.query,
 								variables: requestContext.request.variables
 							}});
