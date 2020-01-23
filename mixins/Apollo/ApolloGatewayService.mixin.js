@@ -67,10 +67,13 @@ const ApolloGatewayService = {
 				plugins: [
 					{
 						requestDidStart(requestContext) {
-							requestContext.context.span = broker.tracer.startSpan("Execute query", { service: svc, tags: {
-								query: requestContext.request.query,
-								variables: requestContext.request.variables
-							}});
+							requestContext.context.span = broker.tracer.startSpan("Execute query", { 
+								service: { fullName: svc.fullName }, 
+								tags: {
+									query: requestContext.request.query,
+									variables: requestContext.request.variables
+								}
+							});
 							return {
 								willSendResponse(requestContext) {
 									console.log("Will send response");
